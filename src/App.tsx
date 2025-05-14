@@ -81,7 +81,7 @@ import LoggedInUserDisplay from "./components/LoggedInUserDisplay";
 import { IoIosLogOut } from "react-icons/io";
 import { useEffect, useState } from "react";
 import LogoutDialog from "./components/dialogBoxs/LogoutDialog";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function App() {
   const navigate = useNavigate();

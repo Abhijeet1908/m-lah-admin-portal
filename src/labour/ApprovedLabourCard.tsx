@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { LabourType } from "../common/types";
 import LabourCardBrief from "../components/customCards/LabourCardBrief";
 const getAllApprovedLabourCard = async (): Promise<LabourType[]> => {

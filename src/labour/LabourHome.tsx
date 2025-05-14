@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import SubmittedLabourCard from "./SubmittedLabourCard";
 import ProcessedLabourCard from "./ProcessedLabourCard";
 import ApprovedLabourCard from "./ApprovedLabourCard";

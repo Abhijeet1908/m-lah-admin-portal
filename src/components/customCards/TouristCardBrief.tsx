@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { TouristType, MemberType } from "../../common/types";
-import { IoChevronDown, IoChevronUp } from "react-icons/io5";
+import { TouristType } from "../../common/types";
+
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 
 const TouristCardBrief: React.FC<{ tourist: TouristType }> = ({ tourist }) => {

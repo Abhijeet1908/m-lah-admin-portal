@@ -1,5 +1,4 @@
 import React from "react";
-import { IoIosLogOut } from "react-icons/io";
 
 type LogoutDialogProps = {
   isOpen: boolean;

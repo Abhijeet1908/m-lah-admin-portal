@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TouristType } from "../common/types";
 import TouristCardBrief from "../components/customCards/TouristCardBrief";
 import axios from "axios";
@@ -99,6 +99,7 @@ const TouristHome = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+        console.log("response data is : ", response);
         const data = await getAllSubmittedTouristCards();
         setLabourCards(data);
       } catch (error) {
