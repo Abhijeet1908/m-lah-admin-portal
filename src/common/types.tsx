@@ -3,6 +3,7 @@ export interface LoggedInUserType {
   userProfile: string;
 }
 export interface LabourType {
+  id?: string;
   firstName: string;
   middleName: string;
   lastName: string;

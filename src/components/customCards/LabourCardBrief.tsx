@@ -1,6 +1,6 @@
 import { MdExpandMore } from "react-icons/md";
 import { MdExpandLess } from "react-icons/md";
-import axios from "axios";
+import axios, { Axios } from "axios";
 import React, { useState } from "react";
 import { LabourType } from "../../common/types";
 
@@ -42,10 +42,57 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
     setExpanded(!expanded);
   };
 
-  function updateLabourCardStatus(): void {
-    console.log("update", status);
+  async function updateLabourCardStatus(): Promise<void> {
+    try {
+      let statusId = 0;
+      if (status === "Approve") {
+        statusId = 3;
+      } else if (status === "Process") {
+        statusId = 2;
+      }
+
+      const updateStatus = {
+        labourId: labour.id,
+        statusId: statusId,
+        remark: inputValue,
+      };
+
+      const response = await axios.post(
+        "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Labour/updateLabourStatus",
+        updateStatus
+      );
+
+      console.log("Status updated successfully:", response.data);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   }
-  function handleReject() {}
+
+  async function handleReject() {
+    try {
+      let statusId = 0;
+      // if (status === "Approve") {
+      //   statusId = 3;
+      // } else if (status === "Process") {
+      //   statusId = 2;
+      // }
+
+      const updateStatus = {
+        labourId: labour.id,
+        statusId: statusId,
+        remark: inputValue,
+      };
+
+      const response = await axios.post(
+        "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Labour/updateLabourStatus",
+        updateStatus
+      );
+
+      console.log("Status updated successfully:", response.data);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  }
   return (
     <div className="relative bg-gray-200 shadow-md rounded-lg p-4 mb-4 hover:shadow-lg transition-all duration-300">
       {/* Expand/Collapse Button */}
