@@ -1,6 +1,6 @@
 import { MdExpandMore } from "react-icons/md";
 import { MdExpandLess } from "react-icons/md";
-import axios, { Axios } from "axios";
+import axios from "axios";
 import React, { useState } from "react";
 import { LabourType } from "../../common/types";
 
