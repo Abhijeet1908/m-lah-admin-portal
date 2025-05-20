@@ -11,7 +11,11 @@ const Login = () => {
     // Dummy login validation
 
     let url = `https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Account/Authenticate?username=${username}&password=${password}`;
-    const response: any = await axios.get(url);
+    const response: any = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
     let user = response.data.username;
     console.log(response);
 

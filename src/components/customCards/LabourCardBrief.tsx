@@ -19,9 +19,17 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
         return;
       }
 
-      const response = await axios.post("https://your-api-url.com/endpoint", {
-        value: inputValue,
-      });
+      const response = await axios.post(
+        "https://your-api-url.com/endpoint",
+        {
+          value: inputValue,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
       console.log("API Response:", response.data);
       alert("Saved successfully!");
@@ -59,7 +67,12 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
 
       const response = await axios.post(
         "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Labour/updateLabourStatus",
-        updateStatus
+        updateStatus,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
 
       console.log("Status updated successfully:", response.data);
@@ -85,7 +98,12 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
 
       const response = await axios.post(
         "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Labour/updateLabourStatus",
-        updateStatus
+        updateStatus,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
 
       console.log("Status updated successfully:", response.data);

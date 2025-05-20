@@ -8,7 +8,12 @@ const getAllProcessedLabourCard = async (
 ): Promise<LabourType[]> => {
   try {
     const response = await axios.get<LabourType[]>(
-      `https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Labour/GetLabourByStatus/${statusId}`
+      `https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Labour/GetLabourByStatus/${statusId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
     );
     return response.data;
   } catch (error) {

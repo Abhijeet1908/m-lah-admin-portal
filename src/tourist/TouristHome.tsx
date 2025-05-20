@@ -6,7 +6,12 @@ import axios from "axios";
 export const getAllSubmittedTouristCards = async (): Promise<TouristType[]> => {
   try {
     const response = await axios.get<TouristType[]>(
-      "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Tourist/GetAllCustomerList"
+      "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Tourist/GetAllCustomerList",
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -103,12 +108,11 @@ const TouristHome = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const token = localStorage.getItem("token");
         const url =
           "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Tourist/GetAllCustomerList";
         const response = await axios.get(url, {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
         console.log("response data is : ", response);
