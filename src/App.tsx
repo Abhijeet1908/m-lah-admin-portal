@@ -1,84 +1,7 @@
-// import AppRoutes from "./route/Routes";
-// import Sidebar from "./components/Sidebar";
-// import LoggedInUserDisplay from "./components/LoggedInUserDisplay";
-// import { LoggedInUserType } from "./common/types";
-// import { IoIosLogOut } from "react-icons/io";
-// import { useEffect, useState } from "react";
-// import LogoutDialog from "./components/dialogBoxs/LogoutDialog";
-// import { Navigate, useLocation, useNavigate } from "react-router-dom";
-
-// function App() {
-//   const navigate = useNavigate();
-//   const location = useLocation();
-//   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-//   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-//   const loggedInUser = {
-//     userName: "Admin Test",
-//     userProfile: "admin",
-//   };
-//   useEffect(() => {
-//     // Check login status from localStorage
-//     const status = localStorage.getItem("isLoggedIn") === "true";
-//     setIsLoggedIn(status);
-
-//     if (!status) {
-//       navigate("/login"); // Redirect to login page if not logged in
-//     }
-//   }, []);
-//   function handleLogout() {
-//     localStorage.removeItem("isLoggedIn"); // Remove login status
-//     setIsLoggedIn(false);
-//     setShowLogoutDialog(false);
-//     navigate("/login"); // Redirect to login page after logout
-//   }
-
-//   if (!isLoggedIn && location.pathname !== "/login") {
-//     return <Navigate to="/login" />;
-//   }
-//   return (
-//     <div>
-//       {isLoggedIn ?? (
-//         <div>
-//           <div className="flex h-12 shadow-lg bg-gray-200 items-center px-4">
-//             <div className="flex justify-between items-center w-full">
-//               <div></div>
-//               <div className="font-bold text-xl text-blue-600  ">m-lah</div>
-//               <div className="flex items-center">
-//                 <LoggedInUserDisplay user={loggedInUser} />
-//                 <div className="pl-1 cursor-pointer">
-//                   <IoIosLogOut
-//                     title="Logout"
-//                     onClick={() => setShowLogoutDialog(true)}
-//                     size={24}
-//                   ></IoIosLogOut>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           <div className="flex">
-//             <Sidebar />
-//             <div className="ml-16 w-full">
-//               <AppRoutes />
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
-//       <LogoutDialog
-//         isOpen={showLogoutDialog}
-//         onClose={() => setShowLogoutDialog(false)}
-//         onLogout={handleLogout}
-//       />
-//     </div>
-//   );
-// }
-// export default App;
-
 import AppRoutes from "./route/Routes";
 import Sidebar from "./components/Sidebar";
 import LoggedInUserDisplay from "./components/LoggedInUserDisplay";
-import { IoIosLogOut } from "react-icons/io";
+import { FiLogOut } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import LogoutDialog from "./components/dialogBoxs/LogoutDialog";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -107,50 +30,75 @@ function App() {
     navigate("/login");
   }
 
-  let loggedInUser = {
-    userName: localStorage.getItem("role") ?? "",
-    userProfile: "admin",
+  const role = localStorage.getItem("role") ?? "Administrator";
+  const loggedInUser = {
+    userName: role,
+    userProfile: role.toLowerCase() === "admin" ? "Super Admin" : "Officer",
   };
 
-  // if (!isLoggedIn && location.pathname !== "/login") {
-  //   return <Navigate to="/login" />;
-  // }
-
-  // if (location.pathname == "/login") {
-  //   setIsLoggedIn(false);
-  //   // localStorage.removeItem("isLoggedIn");
-  // }
-
   return (
-    <div>
+    <div className="min-h-screen bg-sand-50 font-sans text-ink-800 flex flex-col">
       {isLoggedIn ? (
-        <div>
-          <div className="flex h-12 shadow-lg bg-gray-200 items-center px-4 ">
-            <div className="flex justify-between items-center w-full">
-              <div></div>
-              <div className="font-bold text-xl text-blue-600">m-lah</div>
-              <div className="flex items-center">
-                <LoggedInUserDisplay user={loggedInUser} />
-                <div className="pl-1 cursor-pointer">
-                  <IoIosLogOut
-                    title="Logout"
-                    onClick={() => setShowLogoutDialog(true)}
-                    size={24}
-                  />
+        <>
+          {/* Top Authoritative Header */}
+          <header
+            role="banner"
+            className="fixed top-0 left-0 right-0 h-16 bg-ocean-800 border-b border-ocean-700/80 shadow-header z-40 px-4 md:px-6 flex items-center justify-between"
+          >
+            {/* Brand & Emblem */}
+            <div
+              className="flex items-center space-x-3 cursor-pointer select-none"
+              onClick={() => navigate("/")}
+            >
+              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-mint-400 to-ocean-600 text-ocean-900 font-serif font-bold text-xl shadow-md border border-mint-400/30">
+                M
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center space-x-2">
+                  <span className="font-serif font-bold text-2xl text-white tracking-wide">
+                    m-lah
+                  </span>
+                  <span className="badge-tag bg-mint-500/20 text-mint-400 border border-mint-400/30 text-[10px] hidden sm:inline-flex">
+                    Official
+                  </span>
                 </div>
+                <span className="text-[11px] font-medium text-ocean-100/70 -mt-1 tracking-wider uppercase hidden md:inline-block">
+                  Labour & Human Affairs Portal
+                </span>
               </div>
             </div>
-          </div>
 
-          <div className="flex">
-            <Sidebar />
-            <div className="ml-16 w-full">
-              <AppRoutes />
+            {/* Right User & Actions */}
+            <div className="flex items-center space-x-3">
+              <LoggedInUserDisplay user={loggedInUser} />
+
+              <button
+                type="button"
+                onClick={() => setShowLogoutDialog(true)}
+                title="Sign out of portal"
+                className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-coral-500/15 hover:bg-coral-500 text-coral-400 hover:text-white border border-coral-500/30 transition-all duration-200 text-xs font-semibold focus-visible:ring-2 focus-visible:ring-coral-400"
+              >
+                <FiLogOut size={16} />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
             </div>
+          </header>
+
+          {/* Body Container */}
+          <div className="flex pt-16 min-h-screen">
+            <Sidebar />
+            <main
+              role="main"
+              className="ml-16 flex-1 w-[calc(100%-4rem)] p-4 md:p-8 bg-sand-50"
+            >
+              <AppRoutes />
+            </main>
           </div>
-        </div>
+        </>
       ) : (
-        <AppRoutes />
+        <main role="main" className="min-h-screen bg-sand-50">
+          <AppRoutes />
+        </main>
       )}
 
       <LogoutDialog
@@ -163,3 +111,4 @@ function App() {
 }
 
 export default App;
+

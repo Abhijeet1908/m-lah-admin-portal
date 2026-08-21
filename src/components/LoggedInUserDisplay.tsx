@@ -6,20 +6,31 @@ interface LoggedInUserDisplayProps {
 }
 
 const LoggedInUserDisplay: React.FC<LoggedInUserDisplayProps> = ({ user }) => {
-  const names: string[] = user.userName.split(" ");
+  const name = user.userName || "User";
+  const names = name.trim().split(/\s+/);
+  const initials = (
+    (names[0]?.charAt(0) || "U") + (names[1]?.charAt(0) || "")
+  ).toUpperCase();
+
   return (
-    <div>
-      <div className=" flex h-10 w-10 rounded-full bg-gray-400 items-center justify-center  hover:scale-110 shadow-xl">
-        <div
-          className=" text-xl text-blue-600  cursor-none "
-          title={user.userName}
-        >
-          {names[0].charAt(0).toUpperCase() +
-            (names[1]?.charAt(0).toUpperCase() || "")}
-        </div>
+    <div className="flex items-center space-x-3 px-3 py-1.5 rounded-full bg-ocean-900/60 border border-ocean-700/60 text-white">
+      <div
+        className="flex h-8 w-8 rounded-full bg-mint-500 text-ocean-900 font-bold text-xs items-center justify-center shadow-sm"
+        title={`Signed in as ${name}`}
+      >
+        {initials}
+      </div>
+      <div className="hidden md:flex flex-col text-left">
+        <span className="text-xs font-semibold text-sand-50 leading-tight capitalize">
+          {name}
+        </span>
+        <span className="text-[10px] uppercase font-bold tracking-wider text-mint-400">
+          {user.userProfile || "Admin"}
+        </span>
       </div>
     </div>
   );
 };
 
 export default LoggedInUserDisplay;
+

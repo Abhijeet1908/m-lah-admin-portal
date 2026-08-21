@@ -1,3 +1,8 @@
+export interface AuthResponse {
+  username: string;
+  token: string;
+}
+
 export interface LoggedInUserType {
   userName: string;
   userProfile: string;

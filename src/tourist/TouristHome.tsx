@@ -1,150 +1,99 @@
-import { useEffect, useState } from "react";
-import { TouristType } from "../common/types";
+import { useGetAllTourists } from "../utils/base.hooks";
 import TouristCardBrief from "../components/customCards/TouristCardBrief";
-import axios from "axios";
-
-export const getAllSubmittedTouristCards = async (): Promise<TouristType[]> => {
-  try {
-    const response = await axios.get<TouristType[]>(
-      "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Tourist/GetAllCustomerList",
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch tourist cards:", error);
-    throw error; // Or return an empty array if you prefer: return [];
-  }
-};
-
-// export const getAllSubmittedTouristCards = async (): Promise<TouristType[]> => {
-//   return new Promise((resolve) => {
-//     setTimeout(() => {
-//       resolve([
-//         {
-//           firstName: "Alice",
-//           lastName: "Sharma",
-//           email: "alice@example.com",
-//           contactNumber: "9876543210",
-//           photo:
-//             "https://static.vecteezy.com/system/resources/previews/036/190/416/original/business-woman-blank-profile-photos-vector.jpg",
-
-//           documentFront:
-//             "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//           documentBack:
-//             "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-//           gender: "Female",
-//           dob: "1992-05-14",
-//           permanentAddress: "Durgapur, West BEngal",
-//           members: [
-//             {
-//               firstName: "Shayam",
-//               lastName: "Sharma",
-//               email: "shayam@example.com",
-//               contactNumber: "1122334455",
-//               photo:
-//                 "https://static.vecteezy.com/system/resources/previews/036/190/414/non_2x/mature-business-man-blank-profile-photos-vector.jpg",
-
-//               documentFront:
-//                 "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//               documentBack:
-//                 "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-//               gender: "Male",
-//               dob: "1995-08-20",
-//               permanentAddress: "Durgapur, West BEngal",
-//             },
-//             {
-//               firstName: "Priya",
-//               lastName: "Sharma",
-//               email: "priya@example.com",
-//               contactNumber: "2233445566",
-//               photo:
-//                 "https://static.vecteezy.com/system/resources/previews/036/190/416/original/business-woman-blank-profile-photos-vector.jpg",
-
-//               documentFront:
-//                 "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//               documentBack:
-//                 "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-//               gender: "Female",
-//               dob: "2000-11-30",
-//               permanentAddress: "Durgapur, West Bengal",
-//             },
-//           ],
-//         },
-//         {
-//           firstName: "Rahul",
-
-//           lastName: "Dutta",
-//           gender: "Male",
-//           dob: "1992-03-15",
-//           permanentAddress: "Kolkata, West Bengal",
-
-//           contactNumber: "9876543210",
-//           photo:
-//             "https://static.vecteezy.com/system/resources/previews/036/190/414/non_2x/mature-business-man-blank-profile-photos-vector.jpg",
-
-//           documentFront:
-//             "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//           documentBack:
-//             "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-
-//           email: "rahul@example.com",
-
-//           members: [],
-//         },
-//       ]);
-//     }, 1000);
-//   });
-// };
+import { BsFillPeopleFill } from "react-icons/bs";
+import { FiAlertCircle, FiInbox } from "react-icons/fi";
 
 const TouristHome = () => {
-  const [labourCards, setLabourCards] = useState<TouristType[]>([]);
-
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const url =
-          "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Tourist/GetAllCustomerList";
-        const response = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        console.log("response data is : ", response);
-        const data = await getAllSubmittedTouristCards();
-        setLabourCards(data);
-      } catch (error) {
-        console.error("Failed to fetch Tourist Details", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return <div className="text-center mt-10 text-blue-600">Loading...</div>;
-  }
+  const { tourists, loading, error } = useGetAllTourists();
 
   return (
-    <div className="p-4">
-      {labourCards.length === 0 ? (
-        <div className="text-center text-gray-500">
-          Tourist data not available .
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Page Header */}
+      <div className="bg-white rounded-2xl p-6 md:p-8 border border-sand-200 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center space-x-2.5 mb-2">
+            <div className="p-2.5 bg-ocean-50 text-ocean-700 rounded-xl">
+              <BsFillPeopleFill size={22} />
+            </div>
+            <span className="badge-tag bg-ocean-50 text-ocean-700 border border-ocean-100">
+              Visitor Registry
+            </span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold text-ink-900 font-serif">
+            Tourist Group Registrations
+          </h1>
+          <p className="text-sm text-ink-600 mt-1">
+            Authenticated registry of visiting groups, family members, and submitted identity documentation.
+          </p>
         </div>
-      ) : (
-        labourCards.map((tourist, index) => (
-          <TouristCardBrief key={index} tourist={tourist} />
-        ))
+
+        {!loading && !error && (
+          <div className="flex items-center space-x-3 self-start md:self-auto bg-sand-100 px-4 py-2.5 rounded-xl border border-sand-200">
+            <span className="text-xs font-semibold text-ink-600 uppercase tracking-wider">
+              Total Registered Groups:
+            </span>
+            <span className="font-serif text-lg font-bold text-ocean-800">
+              {tourists.length}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Content State Handling */}
+      {loading && (
+        <div className="space-y-4">
+          {[1, 2, 3].map((n) => (
+            <div
+              key={n}
+              className="bg-white rounded-2xl p-6 border border-sand-200 shadow-card animate-pulse flex items-start space-x-4"
+            >
+              <div className="w-16 h-16 rounded-full bg-sand-200 flex-shrink-0" />
+              <div className="flex-1 space-y-3">
+                <div className="h-5 bg-sand-200 rounded w-1/4" />
+                <div className="h-4 bg-sand-100 rounded w-1/2" />
+                <div className="h-4 bg-sand-100 rounded w-1/3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="bg-coral-50 border border-coral-100 rounded-2xl p-6 text-center space-y-2">
+          <div className="inline-flex p-3 bg-coral-100 text-coral-600 rounded-full">
+            <FiAlertCircle size={24} />
+          </div>
+          <h3 className="font-serif font-bold text-ink-900 text-lg">Unable to Load Tourist Records</h3>
+          <p className="text-sm text-ink-600 max-w-md mx-auto">{error}</p>
+        </div>
+      )}
+
+      {!loading && !error && (
+        <>
+          {tourists.length === 0 ? (
+            <div className="bg-white rounded-2xl p-12 text-center border border-sand-200 shadow-card space-y-3">
+              <div className="inline-flex p-4 bg-sand-100 text-ink-400 rounded-full">
+                <FiInbox size={32} />
+              </div>
+              <h3 className="font-serif font-bold text-ink-900 text-lg">
+                No Tourist Groups Registered Yet
+              </h3>
+              <p className="text-sm text-ink-600 max-w-md mx-auto">
+                Applications submitted via the tourist registration portal will appear here for verification and group roster compliance.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {tourists.map((tourist, index) => (
+                <TouristCardBrief key={index} tourist={tourist} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 };
 
 export default TouristHome;
+

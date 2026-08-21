@@ -2,14 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply font-sans bg-sand-50 text-ink-800 antialiased min-h-screen;
+    color: #1e2f37;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-ink-900 tracking-tight;
+  }
+
+  /* High contrast accessible focus ring for keyboard navigation */
+  :focus-visible {
+    @apply outline-none ring-2 ring-mint-500 ring-offset-2 ring-offset-sand-50;
+  }
+}
+
 @layer components {
   .sidebar-icon {
-    @apply relative flex items-center justify-center h-12 w-12 mt-2 mx-auto bg-gray-400 text-blue-500 hover:bg-blue-600
-     hover:text-white rounded-3xl hover:rounded-xl transition-all duration-300 ease-linear cursor-pointer;
+    @apply relative flex items-center justify-center h-11 w-11 mx-auto text-ocean-100/80 hover:text-white hover:bg-ocean-700/80
+      rounded-xl transition-all duration-200 ease-out cursor-pointer;
+  }
+
+  .sidebar-icon-active {
+    @apply bg-mint-500 text-ocean-900 shadow-md font-bold hover:bg-mint-400 hover:text-ocean-900;
   }
 
   .sidebar-tooltip {
-    @apply absolute w-auto p-2 m-2 min-w-max left-14 rounded-md shadow-md text-white bg-blue-600 text-xs font-bold transition-all 
-    duration-100 scale-0  origin-left;
+    @apply absolute w-auto p-2.5 m-2 min-w-max left-14 rounded-lg shadow-xl text-white bg-ocean-900 text-xs font-semibold tracking-wide transition-all 
+      duration-150 scale-0 origin-left z-50 border border-ocean-700/50 pointer-events-none;
+  }
+
+  /* Editorial Badge */
+  .badge-tag {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider;
   }
 }
+

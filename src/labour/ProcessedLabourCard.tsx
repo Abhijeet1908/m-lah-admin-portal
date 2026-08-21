@@ -1,165 +1,68 @@
-import { useEffect, useState } from "react";
+import { useGetLabourByStatus } from "../utils/base.hooks";
 import LabourCardBrief from "../components/customCards/LabourCardBrief";
-import { LabourType } from "../common/types";
-import axios from "axios";
+import { FiAlertCircle, FiInbox } from "react-icons/fi";
 
-const getAllProcessedLabourCard = async (
-  statusId: string
-): Promise<LabourType[]> => {
-  try {
-    const response = await axios.get<LabourType[]>(
-      `https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api/Labour/GetLabourByStatus/${statusId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching labour cards:", error);
-    return [];
-  }
-};
-// const getAllProcessedLabourCard = async (): Promise<LabourType[]> => {
-//   // You would make your real API call here, e.g., using fetch/axios
-//   return new Promise((resolve) => {
-//     setTimeout(() => {
-//       resolve([
-//         {
-//           firstName: "Tenzing",
-//           middleName: "Norbu",
-//           lastName: "Bhutia",
-//           gender: "Male",
-//           dob: "1992-03-15",
-//           permanentAddress: "Gangtok, Sikkim",
-//           currentAddress: "Gangtok, Sikkim",
-//           contactNumber: "9876543210",
-//           photo:
-//             "https://static.vecteezy.com/system/resources/previews/036/190/414/non_2x/mature-business-man-blank-profile-photos-vector.jpg",
-
-//           documentFront:
-//             "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//           documentBack:
-//             "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-//           createdAt: "2024-04-20",
-//         },
-//         {
-//           firstName: "Pema",
-//           middleName: "Lhendup",
-//           lastName: "Lepcha",
-//           gender: "Male",
-//           dob: "1989-07-10",
-//           permanentAddress: "Namchi, Sikkim",
-//           currentAddress: "Namchi, Sikkim",
-//           contactNumber: "9765432180",
-//           photo:
-//             "https://static.vecteezy.com/system/resources/previews/036/190/414/non_2x/mature-business-man-blank-profile-photos-vector.jpg",
-
-//           documentFront:
-//             "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//           documentBack:
-//             "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-//           createdAt: "2024-04-21",
-//         },
-//         {
-//           firstName: "Sonam",
-//           middleName: "Yangzom",
-//           lastName: "Sherpa",
-//           gender: "Female",
-//           dob: "1995-01-05",
-//           permanentAddress: "Gyalshing, Sikkim",
-//           currentAddress: "Gyalshing, Sikkim",
-//           contactNumber: "9456123789",
-//           photo:
-//             "https://static.vecteezy.com/system/resources/previews/036/190/416/original/business-woman-blank-profile-photos-vector.jpg",
-//           documentFront:
-//             "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//           documentBack:
-//             "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-//           createdAt: "2024-04-22",
-//         },
-//         {
-//           firstName: "Karma",
-//           middleName: "Dorji",
-//           lastName: "Tamang",
-//           gender: "Male",
-//           dob: "1991-09-12",
-//           permanentAddress: "Mangan, Sikkim",
-//           currentAddress: "Mangan, Sikkim",
-//           contactNumber: "9123456780",
-//           photo:
-//             "https://static.vecteezy.com/system/resources/previews/036/190/414/non_2x/mature-business-man-blank-profile-photos-vector.jpg",
-
-//           documentFront:
-//             "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//           documentBack:
-//             "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-//           createdAt: "2024-04-23",
-//         },
-//         {
-//           firstName: "Dechen",
-//           middleName: "Dolma",
-//           lastName: "Bhutia",
-//           gender: "Female",
-//           dob: "1994-11-25",
-//           permanentAddress: "Ravangla, Sikkim",
-//           currentAddress: "Ravangla, Sikkim",
-//           contactNumber: "9988776655",
-//           photo:
-//             "https://static.vecteezy.com/system/resources/previews/036/190/416/original/business-woman-blank-profile-photos-vector.jpg",
-//           documentFront:
-//             "https://indiadarpan.com/wp-content/uploads/2018/10/Aadhaar-Card-sample.png",
-//           documentBack:
-//             "https://image-archive.developerhub.io/image/upload/23602/ourgxj9ze0zbe4mogr93/1585254605.jpg",
-//           createdAt: "2024-04-24",
-//         },
-//         // Add more mock data if needed
-//       ]);
-//     }, 1000);
-//   });
-// };
 const ProcessedLabourCard = () => {
-  const [labourCards, setLabourCards] = useState<LabourType[]>([]);
-  const [role, setRole] = useState("");
-
-  const [loading, setLoading] = useState<boolean>(true);
-  let status = "";
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setRole(localStorage.getItem("role") ?? "");
-        const data = await getAllProcessedLabourCard("2");
-        setLabourCards(data);
-      } catch (error) {
-        console.error("Failed to fetch labour cards", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const { labourCards, loading, error } = useGetLabourByStatus("2");
+  const role = localStorage.getItem("role") ?? "";
+  const status = role.toLowerCase() === "admin" ? "Approve" : "";
 
   if (loading) {
-    return <div className="text-center mt-10 text-blue-600">Loading...</div>;
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((n) => (
+          <div
+            key={n}
+            className="bg-white rounded-2xl p-6 border border-sand-200 shadow-card animate-pulse flex items-start space-x-4"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-sand-200 flex-shrink-0" />
+            <div className="flex-1 space-y-3">
+              <div className="h-5 bg-sand-200 rounded w-1/4" />
+              <div className="h-4 bg-sand-100 rounded w-1/2" />
+              <div className="h-4 bg-sand-100 rounded w-1/3" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
-  if (role === "admin") {
-    // setStatus("processed");
-    status = "Approve";
+
+  if (error) {
+    return (
+      <div className="bg-coral-50 border border-coral-100 rounded-2xl p-6 text-center space-y-2">
+        <div className="inline-flex p-3 bg-coral-100 text-coral-600 rounded-full">
+          <FiAlertCircle size={24} />
+        </div>
+        <h3 className="font-serif font-bold text-ink-900 text-lg">Unable to Load Processed Labour Records</h3>
+        <p className="text-sm text-ink-600 max-w-md mx-auto">{error}</p>
+      </div>
+    );
+  }
+
+  if (labourCards.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl p-12 text-center border border-sand-200 shadow-card space-y-3">
+        <div className="inline-flex p-4 bg-sand-100 text-ink-400 rounded-full">
+          <FiInbox size={32} />
+        </div>
+        <h3 className="font-serif font-bold text-ink-900 text-lg">
+          No Processed Applications Pending Approval
+        </h3>
+        <p className="text-sm text-ink-600 max-w-md mx-auto">
+          Applications forwarded by triage officers will appear here for administrator final review and certification.
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-4">
-      {labourCards.length === 0 ? (
-        <div className="text-center text-gray-500">No Labour Cards found.</div>
-      ) : (
-        labourCards.map((labour, index) => (
-          <LabourCardBrief key={index} labour={labour} status={status} />
-        ))
-      )}
+    <div className="space-y-4">
+      {labourCards.map((labour, index) => (
+        <LabourCardBrief key={index} labour={labour} status={status} />
+      ))}
     </div>
   );
 };
 
 export default ProcessedLabourCard;
+
