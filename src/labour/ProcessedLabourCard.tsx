@@ -3,9 +3,8 @@ import LabourCardBrief from "../components/customCards/LabourCardBrief";
 import { FiAlertCircle, FiInbox } from "react-icons/fi";
 
 const ProcessedLabourCard = () => {
-  const { labourCards, loading, error } = useGetLabourByStatus("2");
-  const role = localStorage.getItem("role") ?? "";
-  const status = role.toLowerCase() === "admin" ? "Approve" : "";
+  const { labourCards, loading, error, refetch } = useGetLabourByStatus(2);
+  const status = "Approve";
 
   if (loading) {
     return (
@@ -58,11 +57,17 @@ const ProcessedLabourCard = () => {
   return (
     <div className="space-y-4">
       {labourCards.map((labour, index) => (
-        <LabourCardBrief key={index} labour={labour} status={status} />
+        <LabourCardBrief
+          key={labour.labourId || labour.id || index}
+          labour={labour}
+          status={status}
+          onStatusUpdated={refetch}
+        />
       ))}
     </div>
   );
 };
 
 export default ProcessedLabourCard;
+
 

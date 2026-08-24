@@ -1,13 +1,22 @@
-﻿import { useState, useEffect } from "react";
-import { AuthResponse, LabourType, TouristType } from "../common/types";
+import { useState, useEffect, useCallback } from "react";
+import {
+  AuthResponse,
+  CreateUserDTO,
+  LabourType,
+  TouristType,
+  UserDetails,
+} from "../common/types";
 import {
   apiAuthenticate,
+  apiCreateUser,
   apiGetAllTourists,
+  apiGetAllUserDetails,
   apiGetLabourByStatus,
-  apiUpdateLabourStatus,
+  apiGetUserDetails,
   apiSaveLabourRemark,
-  UpdateLabourStatusPayload,
+  apiUpdateLabourStatus,
   SaveRemarkPayload,
+  UpdateLabourStatusPayload,
 } from "./base.api";
 
 // ---------------------------------------------------------------------------
@@ -32,8 +41,10 @@ export function useAuthenticate(): UseAuthenticateReturn {
     try {
       const data = await apiAuthenticate(username, password);
       return data;
-    } catch (err) {
+    } catch (err: any) {
       const message =
+        err?.message ||
+        err?.response?.data?.message ||
         "Login failed. Please check your credentials and try again.";
       setError(message);
       throw err;
@@ -46,12 +57,124 @@ export function useAuthenticate(): UseAuthenticateReturn {
 }
 
 // ---------------------------------------------------------------------------
+// useGetUserDetails (Current Authenticated User)
+// ---------------------------------------------------------------------------
+interface UseGetUserDetailsReturn {
+  user: UserDetails | null;
+  loading: boolean;
+  error: string;
+  refetch: () => Promise<void>;
+}
+
+export function useGetUserDetails(): UseGetUserDetailsReturn {
+  const [user, setUser] = useState<UserDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchUser = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const data = await apiGetUserDetails();
+      setUser(data);
+    } catch (err: any) {
+      console.warn("Could not fetch user details:", err);
+      setError("Failed to load user profile.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  return { user, loading, error, refetch: fetchUser };
+}
+
+// ---------------------------------------------------------------------------
+// useGetAllUsers (All System User Accounts)
+// ---------------------------------------------------------------------------
+interface UseGetAllUsersReturn {
+  users: UserDetails[];
+  loading: boolean;
+  error: string;
+  refetch: () => Promise<void>;
+}
+
+export function useGetAllUsers(): UseGetAllUsersReturn {
+  const [users, setUsers] = useState<UserDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await apiGetAllUserDetails();
+      setUsers(data || []);
+    } catch (err: any) {
+      console.error("Failed to fetch all user details:", err);
+      setError("Failed to load user accounts.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  return { users, loading, error, refetch: fetchUsers };
+}
+
+// ---------------------------------------------------------------------------
+// useCreateUser
+// ---------------------------------------------------------------------------
+interface UseCreateUserReturn {
+  createUser: (payload: CreateUserDTO) => Promise<any>;
+  isLoading: boolean;
+  error: string;
+}
+
+export function useCreateUser(): UseCreateUserReturn {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const createUser = async (payload: CreateUserDTO): Promise<any> => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const result = await apiCreateUser(payload);
+      return result;
+    } catch (err: any) {
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Failed to create user. Please try again.";
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { createUser, isLoading, error };
+}
+
+// ---------------------------------------------------------------------------
 // useGetAllTourists
 // ---------------------------------------------------------------------------
 interface UseGetAllTouristsReturn {
   tourists: TouristType[];
   loading: boolean;
   error: string;
+  refetch: () => Promise<void>;
 }
 
 export function useGetAllTourists(): UseGetAllTouristsReturn {
@@ -59,28 +182,25 @@ export function useGetAllTourists(): UseGetAllTouristsReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
-    async function fetch() {
-      try {
-        const data = await apiGetAllTourists();
-        if (!cancelled) setTourists(data);
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Failed to fetch tourist list:", err);
-          setError("Failed to load tourist data.");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+  const fetchTourists = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await apiGetAllTourists();
+      setTourists(data || []);
+    } catch (err: any) {
+      console.error("Failed to fetch tourist list:", err);
+      setError("Failed to load tourist data.");
+    } finally {
+      setLoading(false);
     }
-    fetch();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
-  return { tourists, loading, error };
+  useEffect(() => {
+    fetchTourists();
+  }, [fetchTourists]);
+
+  return { tourists, loading, error, refetch: fetchTourists };
 }
 
 // ---------------------------------------------------------------------------
@@ -90,37 +210,35 @@ interface UseGetLabourByStatusReturn {
   labourCards: LabourType[];
   loading: boolean;
   error: string;
+  refetch: () => Promise<void>;
 }
 
 export function useGetLabourByStatus(
-  statusId: string
+  statusId: string | number
 ): UseGetLabourByStatusReturn {
   const [labourCards, setLabourCards] = useState<LabourType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
-    async function fetch() {
-      try {
-        const data = await apiGetLabourByStatus(statusId);
-        if (!cancelled) setLabourCards(data);
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Failed to fetch labour cards:", err);
-          setError("Failed to load labour data.");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+  const fetchLabour = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await apiGetLabourByStatus(statusId);
+      setLabourCards(data || []);
+    } catch (err: any) {
+      console.error(`Failed to fetch labour cards for status ${statusId}:`, err);
+      setError("Failed to load labour data.");
+    } finally {
+      setLoading(false);
     }
-    fetch();
-    return () => {
-      cancelled = true;
-    };
   }, [statusId]);
 
-  return { labourCards, loading, error };
+  useEffect(() => {
+    fetchLabour();
+  }, [fetchLabour]);
+
+  return { labourCards, loading, error, refetch: fetchLabour };
 }
 
 // ---------------------------------------------------------------------------
@@ -143,9 +261,12 @@ export function useUpdateLabourStatus(): UseUpdateLabourStatusReturn {
     setError("");
     try {
       await apiUpdateLabourStatus(payload);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating labour status:", err);
-      setError("Failed to update status. Please try again.");
+      const message =
+        err?.response?.data?.message ||
+        "Failed to update status. Please try again.";
+      setError(message);
       throw err;
     } finally {
       setIsLoading(false);
@@ -173,9 +294,9 @@ export function useSaveLabourRemark(): UseSaveLabourRemarkReturn {
     setError("");
     try {
       await apiSaveLabourRemark(payload);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Save remark failed:", err);
-      setError("Failed to save. Try again.");
+      setError("Failed to save remark. Try again.");
       throw err;
     } finally {
       setIsLoading(false);
@@ -184,3 +305,4 @@ export function useSaveLabourRemark(): UseSaveLabourRemarkReturn {
 
   return { saveRemark, isLoading, error };
 }
+

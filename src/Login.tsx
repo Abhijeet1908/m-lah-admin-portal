@@ -14,18 +14,19 @@ const Login = () => {
     if (!username.trim() || !password.trim()) return;
 
     try {
-      const data = await login(username, password);
-      const { username: user, token } = data;
+      const data = await login(username.trim(), password.trim());
+      const user = data.username || data.role || username.trim();
+      const token = data.token;
+
+      if (!token) {
+        throw new Error(data.message || "Invalid authentication response.");
+      }
 
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("role", user);
       localStorage.setItem("token", token);
 
-      if (user.toLowerCase() === "admin") {
-        navigate("/");
-      } else {
-        navigate("/tourist");
-      }
+      navigate("/");
     } catch {
       // error is already set by the hook
     }

@@ -1,6 +1,7 @@
 import { GrUserWorker } from "react-icons/gr";
 import { BsFillPeopleFill } from "react-icons/bs";
 import { RiDashboardLine } from "react-icons/ri";
+import { FiUsers } from "react-icons/fi";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
@@ -35,6 +36,12 @@ const Sidebar = () => {
         text="Labour Registrations"
         active={isCurrent("/labour")}
         onClick={() => navigate("/labour")}
+      />
+      <SidebarIcon
+        icon={<FiUsers size={20} />}
+        text="User Management"
+        active={isCurrent("/users")}
+        onClick={() => navigate("/users")}
       />
     </aside>
   );

@@ -1,15 +1,25 @@
-﻿import axios from "axios";
-import { AuthResponse, LabourType, TouristType } from "../common/types";
+import axios from "axios";
+import {
+  AuthResponse,
+  CreateUserDTO,
+  LabourType,
+  TouristType,
+  UpdateLabourStatusDTO,
+  UserDetails,
+} from "../common/types";
 
 // ---------------------------------------------------------------------------
 // Shared axios instance — base URL + automatic auth header
 // ---------------------------------------------------------------------------
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://mlhaapi-f8gnd0a9fpedbxat.centralindia-01.azurewebsites.net/api";
+
 const apiClient = axios.create({
-  //   baseURL:
-  //     "https://mlha-e9f4fydheqbweudd.centralus-01.azurewebsites.net/api",
-  // });
-  baseURL:
-    "http://localhost:8081/api",
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -20,13 +30,30 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Clear credentials if token expired/unauthorized
+      const hadToken = Boolean(localStorage.getItem("token"));
+      if (hadToken && window.location.pathname !== "/login") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("role");
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // ---------------------------------------------------------------------------
 // Payload types
 // ---------------------------------------------------------------------------
 export interface UpdateLabourStatusPayload {
-  labourId: string | undefined;
+  labourId: number | string | undefined;
   statusId: number;
-  remark: string;
+  remark?: string;
 }
 
 export interface SaveRemarkPayload {
@@ -43,39 +70,87 @@ export async function apiAuthenticate(
   password: string
 ): Promise<AuthResponse> {
   const response = await apiClient.get<AuthResponse>(
-    `/Account/Authenticate?username=${username}&password=${password}`
+    `/Account/Authenticate?username=${encodeURIComponent(
+      username
+    )}&password=${encodeURIComponent(password)}`
   );
+
+  const data = response.data;
+  if (!data || !data.token) {
+    const errorMsg =
+      data?.message || "Invalid username or password. Please try again.";
+    throw new Error(errorMsg);
+  }
+
+  return data;
+}
+
+/** GET /Account/GetUserDetails — current logged in user details */
+export async function apiGetUserDetails(): Promise<UserDetails> {
+  const response = await apiClient.get<UserDetails>("/Account/GetUserDetails");
   return response.data;
 }
 
-/** GET /Tourist/GetAllCustomerList */
-export async function apiGetAllTourists(): Promise<TouristType[]> {
-  const response = await apiClient.get<TouristType[]>(
-    "/Tourist/GetAllCustomerList"
-  );
+/** GET /Account/GetAllUserDetails — list of all system users */
+export async function apiGetAllUserDetails(): Promise<UserDetails[]> {
+  const response = await apiClient.get<UserDetails[]>("/Account/GetAllUserDetails");
+  return response.data || [];
+}
+
+/** POST /Account/CreateUser — create a new user/officer/admin */
+export async function apiCreateUser(payload: CreateUserDTO): Promise<any> {
+  const response = await apiClient.post("/Account/CreateUser", payload);
   return response.data;
 }
 
-/** GET /Labour/GetLabourByStatus/:statusId */
+/** GET /Labour/GetLabourByStatus/{statusId} — fetch labour by status (1, 2, 3) */
 export async function apiGetLabourByStatus(
-  statusId: string
+  statusId: string | number
 ): Promise<LabourType[]> {
   const response = await apiClient.get<LabourType[]>(
     `/Labour/GetLabourByStatus/${statusId}`
   );
-  return response.data;
+  return response.data || [];
 }
 
-/** POST /Labour/updateLabourStatus */
+/** POST /Labour/updateLabourStatus — triage, approve, or reject labour application */
 export async function apiUpdateLabourStatus(
   payload: UpdateLabourStatusPayload
 ): Promise<void> {
-  await apiClient.post("/Labour/updateLabourStatus", payload);
+  const body: UpdateLabourStatusDTO = {
+    labourId: Number(payload.labourId),
+    statusId: Number(payload.statusId),
+    remark: payload.remark || "",
+  };
+  await apiClient.post("/Labour/updateLabourStatus", body);
 }
 
-/** POST placeholder — save a labour remark (URL to be updated when ready) */
+/** GET /Tourist/GetAllCustomerList — fetch all registered tourist groups */
+export async function apiGetAllTourists(): Promise<TouristType[]> {
+  const response = await apiClient.get<any>(
+    "/Tourist/GetAllCustomerList"
+  );
+  const res = response.data;
+  if (Array.isArray(res)) {
+    return res;
+  }
+  if (res && Array.isArray(res.data)) {
+    return res.data;
+  }
+  if (res && res.data && typeof res.data === "object") {
+    return [res.data];
+  }
+  if (res && Array.isArray(res.result)) {
+    return res.result;
+  }
+  return [];
+}
+
+/** POST placeholder for compatibility */
 export async function apiSaveLabourRemark(
   payload: SaveRemarkPayload
 ): Promise<void> {
-  await apiClient.post("https://your-api-url.com/endpoint", payload);
+  // If no separate endpoint exists, remarks are updated via updateLabourStatus
+  console.info("Labour remark submitted:", payload.value);
 }
+

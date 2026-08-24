@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LabourType } from "../../common/types";
 import { useSaveLabourRemark, useUpdateLabourStatus } from "../../utils/base.hooks";
+import { formatImageSrc } from "./TouristCardBrief";
 import {
   FiChevronDown,
   FiX,
@@ -13,10 +14,11 @@ import {
   FiSave,
 } from "react-icons/fi";
 
-const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
-  labour,
-  status,
-}) => {
+const LabourCardBrief: React.FC<{
+  labour: LabourType;
+  status?: string;
+  onStatusUpdated?: () => void;
+}> = ({ labour, status, onStatusUpdated }) => {
   const [expanded, setExpanded] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -61,9 +63,17 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
     } else if (status === "Process") {
       statusId = 2;
     }
+    const numericLabourId = Number(labour.labourId ?? labour.id ?? 0);
     try {
-      await updateStatus({ labourId: labour.id, statusId, remark: inputValue });
+      await updateStatus({
+        labourId: numericLabourId,
+        statusId,
+        remark: inputValue,
+      });
       setActionSuccess(`Application successfully marked as ${status}d.`);
+      if (onStatusUpdated) {
+        onStatusUpdated();
+      }
       setTimeout(() => setActionSuccess(null), 3000);
     } catch {
       // error state is managed by the hook
@@ -71,9 +81,17 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
   }
 
   async function handleReject() {
+    const numericLabourId = Number(labour.labourId ?? labour.id ?? 0);
     try {
-      await updateStatus({ labourId: labour.id, statusId: 0, remark: inputValue });
+      await updateStatus({
+        labourId: numericLabourId,
+        statusId: 0,
+        remark: inputValue,
+      });
       setActionSuccess("Application marked as Rejected.");
+      if (onStatusUpdated) {
+        onStatusUpdated();
+      }
       setTimeout(() => setActionSuccess(null), 3000);
     } catch {
       // error state is managed by the hook
@@ -84,6 +102,10 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
     .filter(Boolean)
     .join(" ");
 
+  const labourPhoto = formatImageSrc(labour.photo);
+  const labourDocFront = formatImageSrc(labour.documentFront);
+  const labourDocBack = formatImageSrc(labour.documentBack);
+
   return (
     <article className="bg-white rounded-2xl p-6 border border-sand-200 shadow-card hover:shadow-card-hover transition-all duration-200">
       {/* Overview Top Row */}
@@ -91,15 +113,23 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
         {/* Left - Photo + Basic Identity */}
         <div className="flex items-start space-x-4">
           <div className="relative group/img flex-shrink-0">
-            <img
-              src={labour.photo}
-              alt={fullName}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-sand-200 shadow-sm group-hover/img:border-mint-500 cursor-pointer transition-colors"
-              onClick={() => setSelectedImage(labour.photo)}
-            />
-            <span className="absolute -bottom-1 -right-1 p-1 bg-ocean-900 text-mint-400 rounded-lg text-[10px] font-bold shadow-sm opacity-0 group-hover/img:opacity-100 transition-opacity">
-              View
-            </span>
+            {labourPhoto ? (
+              <img
+                src={labourPhoto}
+                alt={fullName}
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-sand-200 shadow-sm group-hover/img:border-mint-500 cursor-pointer transition-colors"
+                onClick={() => setSelectedImage(labourPhoto)}
+              />
+            ) : (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-ocean-800 text-mint-400 font-serif font-bold text-xl flex items-center justify-center border-2 border-sand-200 shadow-sm">
+                {labour.firstName?.charAt(0) || "L"}
+              </div>
+            )}
+            {labourPhoto && (
+              <span className="absolute -bottom-1 -right-1 p-1 bg-ocean-900 text-mint-400 rounded-lg text-[10px] font-bold shadow-sm opacity-0 group-hover/img:opacity-100 transition-opacity">
+                View
+              </span>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -108,7 +138,7 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
                 {fullName}
               </h2>
               <span className="badge-tag bg-ocean-50 text-ocean-700 border border-ocean-200/80">
-                Labour Record
+                Labour Record #{labour.labourId || labour.id || ""}
               </span>
             </div>
 
@@ -178,31 +208,37 @@ const LabourCardBrief: React.FC<{ labour: LabourType; status?: string }> = ({
             </div>
 
             {/* Document Attachments */}
-            <div className="pt-3 border-t border-sand-200/60">
-              <span className="text-xs font-bold text-ink-700 uppercase tracking-wider block mb-2">
-                Certified Identification Documents
-              </span>
-              <div className="flex flex-wrap gap-4">
-                <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-600">Document Front</span>
-                  <img
-                    src={labour.documentFront}
-                    alt="Document Front"
-                    className="w-32 h-20 object-cover rounded-xl border border-sand-300 hover:border-mint-500 cursor-pointer shadow-sm transition-all hover:scale-105"
-                    onClick={() => setSelectedImage(labour.documentFront)}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[11px] font-semibold text-ink-600">Document Back</span>
-                  <img
-                    src={labour.documentBack}
-                    alt="Document Back"
-                    className="w-32 h-20 object-cover rounded-xl border border-sand-300 hover:border-mint-500 cursor-pointer shadow-sm transition-all hover:scale-105"
-                    onClick={() => setSelectedImage(labour.documentBack)}
-                  />
+            {(labourDocFront || labourDocBack) && (
+              <div className="pt-3 border-t border-sand-200/60">
+                <span className="text-xs font-bold text-ink-700 uppercase tracking-wider block mb-2">
+                  Certified Identification Documents
+                </span>
+                <div className="flex flex-wrap gap-4">
+                  {labourDocFront && (
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-ink-600">Document Front</span>
+                      <img
+                        src={labourDocFront}
+                        alt="Document Front"
+                        className="w-32 h-20 object-cover rounded-xl border border-sand-300 hover:border-mint-500 cursor-pointer shadow-sm transition-all hover:scale-105"
+                        onClick={() => setSelectedImage(labourDocFront)}
+                      />
+                    </div>
+                  )}
+                  {labourDocBack && (
+                    <div className="space-y-1">
+                      <span className="text-[11px] font-semibold text-ink-600">Document Back</span>
+                      <img
+                        src={labourDocBack}
+                        alt="Document Back"
+                        className="w-32 h-20 object-cover rounded-xl border border-sand-300 hover:border-mint-500 cursor-pointer shadow-sm transition-all hover:scale-105"
+                        onClick={() => setSelectedImage(labourDocBack)}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Officer Verification & Triage Action Section */}

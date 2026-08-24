@@ -3,7 +3,7 @@ import LabourCardBrief from "../components/customCards/LabourCardBrief";
 import { FiAlertCircle, FiInbox } from "react-icons/fi";
 
 function ApprovedLabourCard() {
-  const { labourCards, loading, error } = useGetLabourByStatus("3");
+  const { labourCards, loading, error, refetch } = useGetLabourByStatus(3);
 
   if (loading) {
     return (
@@ -56,11 +56,16 @@ function ApprovedLabourCard() {
   return (
     <div className="space-y-4">
       {labourCards.map((labour, index) => (
-        <LabourCardBrief key={index} labour={labour} />
+        <LabourCardBrief
+          key={labour.labourId || labour.id || index}
+          labour={labour}
+          onStatusUpdated={refetch}
+        />
       ))}
     </div>
   );
 }
 
 export default ApprovedLabourCard;
+
 
