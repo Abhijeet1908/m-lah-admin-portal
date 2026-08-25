@@ -9,16 +9,20 @@ interface LoggedInUserDisplayProps {
 const LoggedInUserDisplay: React.FC<LoggedInUserDisplayProps> = ({ user: fallbackUser }) => {
   const { user: apiUser } = useGetUserDetails();
 
-  const roleFromStorage = localStorage.getItem("role") || "Administrator";
+  const storedRole = localStorage.getItem("role") || "";
+  const storedRoleId = localStorage.getItem("roleId") ? Number(localStorage.getItem("roleId")) : null;
+  const storedName = localStorage.getItem("userFullName") || localStorage.getItem("userName") || fallbackUser?.userName || "";
+
+  const roleId = apiUser?.roleId ?? storedRoleId;
+  const rawRole = (apiUser?.role || storedRole || (roleId === 1 ? "Admin" : "Reviewer")).toLowerCase();
+
+  const displayRole = roleId === 1 || rawRole.includes("admin") ? "Admin" : "Reviewer";
+
   const displayName =
     [apiUser?.firstName, apiUser?.lastName].filter(Boolean).join(" ") ||
     apiUser?.userName ||
-    fallbackUser?.userName ||
-    roleFromStorage;
-
-  const displayRole =
-    apiUser?.role ||
-    (displayName.toLowerCase() === "admin" ? "Super Admin" : "Officer");
+    storedName ||
+    displayRole;
 
   const names = displayName.trim().split(/\s+/);
   const initials = (

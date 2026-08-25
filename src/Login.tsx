@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthenticate } from "./utils/base.hooks";
+import { apiGetUserDetails } from "./utils/base.api";
 import { FiLock, FiUser, FiShield, FiAlertCircle, FiArrowRight } from "react-icons/fi";
 
 const Login = () => {
@@ -15,16 +16,49 @@ const Login = () => {
 
     try {
       const data = await login(username.trim(), password.trim());
-      const user = data.username || data.role || username.trim();
       const token = data.token;
 
       if (!token) {
         throw new Error(data.message || "Invalid authentication response.");
       }
 
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("role", user);
       localStorage.setItem("token", token);
+      localStorage.setItem("isLoggedIn", "true");
+
+      // Fetch user profile to extract real role and roleId
+      try {
+        const userProfile = await apiGetUserDetails();
+        if (userProfile) {
+          const roleName =
+            userProfile.role ||
+            (userProfile.roleId === 1 ? "Admin" : "Reviewer");
+          const roleId =
+            userProfile.roleId ?? (roleName.toLowerCase() === "admin" ? 1 : 2);
+          const fullName =
+            [userProfile.firstName, userProfile.lastName].filter(Boolean).join(" ") ||
+            userProfile.userName ||
+            username.trim();
+
+          localStorage.setItem("role", roleName);
+          localStorage.setItem("roleId", String(roleId));
+          localStorage.setItem("userName", userProfile.userName || username.trim());
+          localStorage.setItem("userFullName", fullName);
+        } else {
+          const fallbackRole =
+            data.role ||
+            (username.trim().toLowerCase() === "admin" ? "Admin" : "Reviewer");
+          localStorage.setItem("role", fallbackRole);
+          localStorage.setItem("roleId", String(fallbackRole.toLowerCase() === "admin" ? 1 : 2));
+          localStorage.setItem("userName", data.username || username.trim());
+        }
+      } catch {
+        const fallbackRole =
+          data.role ||
+          (username.trim().toLowerCase() === "admin" ? "Admin" : "Reviewer");
+        localStorage.setItem("role", fallbackRole);
+        localStorage.setItem("roleId", String(fallbackRole.toLowerCase() === "admin" ? 1 : 2));
+        localStorage.setItem("userName", data.username || username.trim());
+      }
 
       navigate("/");
     } catch {
@@ -37,8 +71,12 @@ const Login = () => {
       <div className="w-full max-w-lg bg-white rounded-3xl p-8 md:p-12 shadow-2xl border border-sand-200/80 relative overflow-hidden">
         {/* Top Decorative Emblem Banner */}
         <div className="text-center space-y-3 mb-8">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-mint-400 to-ocean-600 text-ocean-900 font-serif font-bold text-3xl shadow-md mx-auto">
-            M
+          <div className="inline-block p-1 bg-ocean-900 rounded-2xl shadow-xl border border-sand-300/40">
+            <img
+              src="/mlah-logo.png"
+              alt="m-lah Official Logo"
+              className="h-20 w-20 rounded-xl object-cover mx-auto"
+            />
           </div>
           <div>
             <div className="flex items-center justify-center space-x-2">
@@ -89,7 +127,7 @@ const Login = () => {
                 type="text"
                 required
                 autoComplete="username"
-                placeholder="e.g. admin or user"
+                placeholder="e.g. admin or reviewer"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-sand-300 bg-sand-50/50 text-ink-900 text-sm font-medium focus-visible:ring-2 focus-visible:ring-ocean-600 focus-visible:bg-white transition-all placeholder:text-ink-400"
@@ -132,14 +170,18 @@ const Login = () => {
         </form>
 
         {/* Credentials Guidance Helper */}
-        <div className="mt-8 pt-6 border-t border-sand-100 text-center">
-          <p className="text-xs text-ink-400 mb-2">System Authentication Roles</p>
-          <div className="flex justify-center gap-3 text-[11px]">
-            <span className="px-2.5 py-1 rounded-lg bg-sand-100 text-ink-600 font-mono">
-              admin
+        <div className="mt-8 pt-6 border-t border-sand-100 text-center space-y-2.5">
+          <p className="text-[11px] font-bold text-ink-400 uppercase tracking-wider">
+            Authorized Portal Access Roles
+          </p>
+          <div className="flex flex-wrap justify-center gap-2.5 text-xs">
+            <span className="px-3 py-1.5 rounded-xl bg-mint-50 text-mint-700 border border-mint-200/80 font-semibold flex items-center gap-1.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-mint-500"></span>
+              Admin
             </span>
-            <span className="px-2.5 py-1 rounded-lg bg-sand-100 text-ink-600 font-mono">
-              user
+            <span className="px-3 py-1.5 rounded-xl bg-ocean-50 text-ocean-700 border border-ocean-200/80 font-semibold flex items-center gap-1.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-ocean-500"></span>
+              Reviewer
             </span>
           </div>
         </div>

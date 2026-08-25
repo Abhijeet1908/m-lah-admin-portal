@@ -17,9 +17,8 @@ import {
 } from "react-icons/fi";
 
 const ROLE_OPTIONS = [
-  { id: 1, name: "Admin", label: "Super Administrator", badgeColor: "bg-mint-50 text-mint-700 border-mint-200" },
-  { id: 2, name: "Officer", label: "Verification Officer", badgeColor: "bg-ocean-50 text-ocean-700 border-ocean-200" },
-  { id: 3, name: "User", label: "Standard Operator", badgeColor: "bg-sand-100 text-ink-700 border-sand-300" },
+  { id: 1, name: "Admin", label: "Administrator", badgeColor: "bg-mint-50 text-mint-700 border-mint-200" },
+  { id: 2, name: "Reviewer", label: "Reviewer", badgeColor: "bg-ocean-50 text-ocean-700 border-ocean-200" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -190,9 +189,8 @@ const UserManagement: React.FC = () => {
     const matchesRole =
       selectedRoleFilter === "all" ||
       (u.role && u.role.toLowerCase() === selectedRoleFilter.toLowerCase()) ||
-      (selectedRoleFilter === "admin" && u.roleId === 1) ||
-      (selectedRoleFilter === "officer" && u.roleId === 2) ||
-      (selectedRoleFilter === "user" && u.roleId === 3);
+      (selectedRoleFilter === "admin" && (u.roleId === 1 || u.role?.toLowerCase() === "admin")) ||
+      (selectedRoleFilter === "reviewer" && (u.roleId === 2 || u.role?.toLowerCase() === "reviewer" || u.role?.toLowerCase() === "user" || u.role?.toLowerCase() === "officer"));
 
     return matchesSearch && matchesRole;
   });
@@ -277,9 +275,8 @@ const UserManagement: React.FC = () => {
             className="px-3 py-2 rounded-xl border border-sand-300 bg-white text-ink-800 text-xs sm:text-sm font-medium focus-visible:ring-2 focus-visible:ring-ocean-500"
           >
             <option value="all">All Roles</option>
-            <option value="admin">Administrators</option>
-            <option value="officer">Verification Officers</option>
-            <option value="user">Standard Users</option>
+            <option value="admin">Administrators (ID: 1)</option>
+            <option value="reviewer">Reviewers (ID: 2)</option>
           </select>
 
           <span className="text-xs text-ink-400 font-mono ml-2">

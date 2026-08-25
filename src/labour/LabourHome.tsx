@@ -17,7 +17,7 @@ const LabourHome = () => {
       icon: <FiClock className="mr-2" size={16} />,
       badge: "Stage 1",
       badgeColor: "bg-coral-50 text-coral-600 border-coral-200",
-      description: "Initial applicant intake awaiting officer triage.",
+      description: "Initial applicant intake awaiting reviewer verification & triage. (Action: Reviewer Only)",
     },
     {
       id: "processed",
@@ -25,7 +25,7 @@ const LabourHome = () => {
       icon: <FiFileText className="mr-2" size={16} />,
       badge: "Stage 2",
       badgeColor: "bg-ocean-50 text-ocean-700 border-ocean-200",
-      description: "Pre-verified records submitted for administrator authorization.",
+      description: "Pre-verified records submitted for final administrative authorization. (Action: Admin Only)",
     },
     {
       id: "approved",
@@ -33,7 +33,7 @@ const LabourHome = () => {
       icon: <FiCheckCircle className="mr-2" size={16} />,
       badge: "Stage 3",
       badgeColor: "bg-mint-50 text-mint-700 border-mint-200",
-      description: "Formally certified and sanctioned labor applicants.",
+      description: "Formally certified and sanctioned labor applicants. (Read-Only Register)",
     },
   ] as const;
 

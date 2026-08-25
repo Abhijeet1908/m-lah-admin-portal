@@ -23,6 +23,9 @@ function App() {
 
   function handleLogout() {
     localStorage.removeItem("role");
+    localStorage.removeItem("roleId");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userFullName");
     localStorage.removeItem("token");
     localStorage.removeItem("isLoggedIn");
     setIsLoggedIn(false);
@@ -30,10 +33,13 @@ function App() {
     navigate("/login");
   }
 
-  const role = localStorage.getItem("role") ?? "Administrator";
+  const role = localStorage.getItem("role") ?? "Reviewer";
+  const roleId = localStorage.getItem("roleId") ? Number(localStorage.getItem("roleId")) : (role.toLowerCase() === "admin" ? 1 : 2);
+  const userName = localStorage.getItem("userFullName") || localStorage.getItem("userName") || role;
+
   const loggedInUser = {
-    userName: role,
-    userProfile: role.toLowerCase() === "admin" ? "Super Admin" : "Officer",
+    userName,
+    userProfile: roleId === 1 || role.toLowerCase() === "admin" ? "Admin" : "Reviewer",
   };
 
   return (
@@ -50,9 +56,11 @@ function App() {
               className="flex items-center space-x-3 cursor-pointer select-none"
               onClick={() => navigate("/")}
             >
-              <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-gradient-to-br from-mint-400 to-ocean-600 text-ocean-900 font-serif font-bold text-xl shadow-md border border-mint-400/30">
-                M
-              </div>
+              <img
+                src="/mlah-logo.png"
+                alt="m-lah Logo"
+                className="h-10 w-10 rounded-xl object-cover shadow-md border border-mint-400/40"
+              />
               <div className="flex flex-col">
                 <div className="flex items-center space-x-2">
                   <span className="font-serif font-bold text-2xl text-white tracking-wide">

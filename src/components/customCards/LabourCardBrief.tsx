@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { LabourType } from "../../common/types";
-import { useSaveLabourRemark, useUpdateLabourStatus } from "../../utils/base.hooks";
+import {
+  useSaveLabourRemark,
+  useUpdateLabourStatus,
+  useGetUserDetails,
+} from "../../utils/base.hooks";
 import { formatImageSrc } from "./TouristCardBrief";
 import {
   FiChevronDown,
@@ -12,6 +16,9 @@ import {
   FiCheckCircle,
   FiXCircle,
   FiSave,
+  FiShield,
+  FiLock,
+  FiInfo,
 } from "react-icons/fi";
 
 const LabourCardBrief: React.FC<{
@@ -97,6 +104,20 @@ const LabourCardBrief: React.FC<{
       // error state is managed by the hook
     }
   }
+
+  const { user } = useGetUserDetails();
+  const storedRole = localStorage.getItem("role") || "";
+  const storedRoleId = localStorage.getItem("roleId") ? Number(localStorage.getItem("roleId")) : null;
+  const roleId = user?.roleId ?? storedRoleId;
+  const rawRole = (user?.role || storedRole || (roleId === 1 ? "admin" : "reviewer")).toLowerCase();
+  const isAdmin = roleId === 1 || rawRole.includes("admin");
+  const isReviewer = roleId === 2 || rawRole.includes("reviewer") || rawRole.includes("officer") || rawRole.includes("user");
+
+  // Stage 1 (status === "Process"): ONLY Reviewer can update submitted labour to processed
+  // Stage 2 (status === "Approve"): ONLY Admin can approve processed labour
+  const isAuthorized =
+    (status === "Process" && isReviewer) ||
+    (status === "Approve" && isAdmin);
 
   const fullName = [labour.firstName, labour.middleName, labour.lastName]
     .filter(Boolean)
@@ -245,81 +266,110 @@ const LabourCardBrief: React.FC<{
           {status && status.length > 0 && (
             <div className="bg-ocean-50/50 rounded-xl p-5 border border-ocean-100 space-y-4">
               <h3 className="text-sm font-bold text-ocean-900 font-serif flex items-center justify-between">
-                <span>Administrative Triage & Status Actions</span>
-                <span className="badge-tag bg-ocean-700 text-white text-[10px]">
-                  Action Required: {status}
+                <span className="flex items-center gap-2">
+                  <FiShield className="text-ocean-700" size={16} />
+                  <span>Administrative Triage &amp; Status Actions</span>
+                </span>
+                <span
+                  className={`badge-tag text-[10px] ${
+                    isAuthorized
+                      ? "bg-ocean-700 text-white"
+                      : "bg-sand-200 text-ink-600 border border-sand-300"
+                  }`}
+                >
+                  Action: {status} ({status === "Process" ? "Reviewer Only" : "Admin Only"})
                 </span>
               </h3>
 
-              {/* Remarks Input */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-sand-300 bg-white text-sm text-ink-800 focus-visible:ring-2 focus-visible:ring-ocean-500"
-                  placeholder="Enter officer notes or compliance remarks..."
-                />
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={isSaving || !inputValue.trim()}
-                    className="px-4 py-2.5 rounded-xl bg-ocean-700 hover:bg-ocean-600 text-white font-semibold text-xs transition-colors flex items-center space-x-1.5 disabled:opacity-50"
-                  >
-                    <FiSave size={14} />
-                    <span>{isSaving ? "Saving..." : "Save Note"}</span>
-                  </button>
-                  {inputValue && (
+              {isAuthorized ? (
+                <>
+                  {/* Remarks Input */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <input
+                      type="text"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-sand-300 bg-white text-sm text-ink-800 focus-visible:ring-2 focus-visible:ring-ocean-500"
+                      placeholder="Enter reviewer notes or compliance remarks..."
+                    />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={isSaving || !inputValue.trim()}
+                        className="px-4 py-2.5 rounded-xl bg-ocean-700 hover:bg-ocean-600 text-white font-semibold text-xs transition-colors flex items-center space-x-1.5 disabled:opacity-50"
+                      >
+                        <FiSave size={14} />
+                        <span>{isSaving ? "Saving..." : "Save Note"}</span>
+                      </button>
+                      {inputValue && (
+                        <button
+                          type="button"
+                          onClick={handleCancel}
+                          className="px-3 py-2.5 rounded-xl bg-sand-200 hover:bg-sand-300 text-ink-700 text-xs font-semibold transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Feedback Notifications */}
+                  {saveSuccess && (
+                    <p className="text-mint-600 text-xs font-semibold flex items-center">
+                      <FiCheckCircle className="mr-1" /> Remark saved successfully.
+                    </p>
+                  )}
+                  {actionSuccess && (
+                    <p className="text-mint-600 text-xs font-semibold flex items-center">
+                      <FiCheckCircle className="mr-1" /> {actionSuccess}
+                    </p>
+                  )}
+                  {saveError && <p className="text-coral-600 text-xs">{saveError}</p>}
+                  {updateError && <p className="text-coral-600 text-xs">{updateError}</p>}
+
+                  {/* Pipeline Stage Transition Buttons */}
+                  <div className="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-ocean-100">
                     <button
                       type="button"
-                      onClick={handleCancel}
-                      className="px-3 py-2.5 rounded-xl bg-sand-200 hover:bg-sand-300 text-ink-700 text-xs font-semibold transition-colors"
+                      onClick={handleReject}
+                      disabled={isUpdating}
+                      className="px-5 py-2.5 rounded-xl bg-coral-50 hover:bg-coral-500 text-coral-600 hover:text-white border border-coral-200 font-bold text-xs shadow-sm transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-coral-400 disabled:opacity-50"
                     >
-                      Clear
+                      <FiXCircle size={15} />
+                      <span>Reject Application</span>
                     </button>
-                  )}
+
+                    <button
+                      type="button"
+                      onClick={updateLabourCardStatus}
+                      disabled={isUpdating}
+                      className="px-6 py-2.5 rounded-xl bg-mint-500 hover:bg-mint-400 text-ocean-900 font-bold text-xs shadow-md transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-ocean-500 disabled:opacity-50"
+                    >
+                      <FiCheckCircle size={15} />
+                      <span>
+                        {isUpdating ? "Updating..." : `${status} Application`}
+                      </span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="p-3.5 rounded-xl bg-sand-100/90 border border-sand-200 text-xs text-ink-600 flex items-start space-x-2.5">
+                  <FiLock className="text-ocean-700 flex-shrink-0 mt-0.5" size={15} />
+                  <div>
+                    <span className="font-bold text-ink-900 block">
+                      {status === "Process"
+                        ? "Reviewer Action Required"
+                        : "Administrator Authorization Required"}
+                    </span>
+                    <p className="text-ink-600 mt-0.5">
+                      {status === "Process"
+                        ? "Only Verification Reviewers are authorized to triage and process Stage 1 submitted labour details to Stage 2. You have full read access as an Administrator."
+                        : "Only Administrators are authorized to sanction and approve Stage 2 processed labour details. You have full read access as a Reviewer."}
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              {/* Feedback Notifications */}
-              {saveSuccess && (
-                <p className="text-mint-600 text-xs font-semibold flex items-center">
-                  <FiCheckCircle className="mr-1" /> Remark saved successfully.
-                </p>
               )}
-              {actionSuccess && (
-                <p className="text-mint-600 text-xs font-semibold flex items-center">
-                  <FiCheckCircle className="mr-1" /> {actionSuccess}
-                </p>
-              )}
-              {saveError && <p className="text-coral-600 text-xs">{saveError}</p>}
-              {updateError && <p className="text-coral-600 text-xs">{updateError}</p>}
-
-              {/* Pipeline Stage Transition Buttons */}
-              <div className="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-ocean-100">
-                <button
-                  type="button"
-                  onClick={handleReject}
-                  disabled={isUpdating}
-                  className="px-5 py-2.5 rounded-xl bg-coral-50 hover:bg-coral-500 text-coral-600 hover:text-white border border-coral-200 font-bold text-xs shadow-sm transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-coral-400 disabled:opacity-50"
-                >
-                  <FiXCircle size={15} />
-                  <span>Reject Application</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={updateLabourCardStatus}
-                  disabled={isUpdating}
-                  className="px-6 py-2.5 rounded-xl bg-mint-500 hover:bg-mint-400 text-ocean-900 font-bold text-xs shadow-md transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-ocean-500 disabled:opacity-50"
-                >
-                  <FiCheckCircle size={15} />
-                  <span>
-                    {isUpdating ? "Updating..." : `${status} Application`}
-                  </span>
-                </button>
-              </div>
             </div>
           )}
         </div>

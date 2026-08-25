@@ -15,9 +15,15 @@ import { useGetUserDetails } from "../utils/base.hooks";
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useGetUserDetails();
-  const role = user?.firstName
+  const storedRole = localStorage.getItem("role") || "";
+  const storedRoleId = localStorage.getItem("roleId") ? Number(localStorage.getItem("roleId")) : null;
+  const roleId = user?.roleId ?? storedRoleId;
+  const rawRole = (user?.role || storedRole || (roleId === 1 ? "Admin" : "Reviewer")).toLowerCase();
+  const displayRole = roleId === 1 || rawRole.includes("admin") ? "Admin" : "Reviewer";
+
+  const displayName = user?.firstName
     ? `${user.firstName} ${user.lastName || ""}`
-    : user?.userName || localStorage.getItem("role") || "Administrator";
+    : user?.userName || localStorage.getItem("userFullName") || localStorage.getItem("userName") || displayRole;
 
   return (
     <div className="max-w-7xl mx-auto space-y-10">
@@ -43,7 +49,9 @@ const Home = () => {
           </h1>
 
           <p className="text-ocean-100/90 text-base md:text-lg mt-4 font-normal leading-relaxed">
-            Welcome, <span className="font-semibold text-mint-400 capitalize">{role}</span>. The m-lah portal coordinates authenticated tourist group registrations, multi-stage verification for labor certifications, and officer access control across municipal departments.
+            Welcome, <span className="font-semibold text-mint-400 capitalize">{displayName}</span> (
+            <span className="text-mint-300 font-semibold">{displayRole}</span>
+            ). The m-lah portal coordinates authenticated tourist group registrations, multi-stage verification for labor certifications, and officer access control across municipal departments.
           </p>
 
           {/* Quick Action CTAs */}
