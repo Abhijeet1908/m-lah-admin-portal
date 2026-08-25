@@ -22,10 +22,8 @@ import {
   FiRotateCcw,
   FiSlash,
   FiArrowRight,
-  FiFileText,
   FiCheckSquare,
   FiAward,
-  FiInfo,
 } from "react-icons/fi";
 
 interface LabourCardBriefProps {
@@ -155,8 +153,8 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
     (status === "Process"
       ? LabourStatusEnum.Submitted
       : status === "Approve"
-      ? LabourStatusEnum.Reviewed
-      : LabourStatusEnum.Approved);
+        ? LabourStatusEnum.Reviewed
+        : LabourStatusEnum.Approved);
 
   const statusMeta = getLabourStatusMeta(currentStatusId);
 
@@ -338,9 +336,8 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
           <span>{expanded ? "Hide Details" : "View Record"}</span>
           <FiChevronDown
             size={16}
-            className={`transform transition-transform duration-200 ${
-              expanded ? "rotate-180 text-mint-600" : ""
-            }`}
+            className={`transform transition-transform duration-200 ${expanded ? "rotate-180 text-mint-600" : ""
+              }`}
           />
         </button>
       </div>
@@ -457,11 +454,10 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
                     Verification Status
                   </span>
                   <span
-                    className={`inline-flex items-center gap-1 font-bold mt-1 px-2.5 py-0.5 rounded-lg border text-[11px] ${
-                      labour.isVerified
-                        ? "bg-mint-50 text-mint-700 border-mint-200"
-                        : "bg-sand-100 text-ink-600 border-sand-200"
-                    }`}
+                    className={`inline-flex items-center gap-1 font-bold mt-1 px-2.5 py-0.5 rounded-lg border text-[11px] ${labour.isVerified
+                      ? "bg-mint-50 text-mint-700 border-mint-200"
+                      : "bg-sand-100 text-ink-600 border-sand-200"
+                      }`}
                   >
                     <FiCheckCircle size={12} />
                     {labour.isVerified ? "Verified" : "Pending Verification"}
@@ -500,11 +496,10 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
                     Approval Sanction
                   </span>
                   <span
-                    className={`inline-flex items-center gap-1 font-bold mt-1 px-2.5 py-0.5 rounded-lg border text-[11px] ${
-                      labour.isApproved
-                        ? "bg-mint-50 text-mint-700 border-mint-200"
-                        : "bg-sand-100 text-ink-600 border-sand-200"
-                    }`}
+                    className={`inline-flex items-center gap-1 font-bold mt-1 px-2.5 py-0.5 rounded-lg border text-[11px] ${labour.isApproved
+                      ? "bg-mint-50 text-mint-700 border-mint-200"
+                      : "bg-sand-100 text-ink-600 border-sand-200"
+                      }`}
                   >
                     <FiAward size={12} />
                     {labour.isApproved ? "Approved" : "Pending Approval"}
@@ -555,9 +550,8 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
                     Certification Valid Upto
                   </span>
                   <p
-                    className={`font-semibold mt-0.5 flex items-center ${
-                      isExpired ? "text-rose-700" : "text-mint-700"
-                    }`}
+                    className={`font-semibold mt-0.5 flex items-center ${isExpired ? "text-rose-700" : "text-mint-700"
+                      }`}
                   >
                     <FiClock className="mr-1 flex-shrink-0" size={12} />
                     <span>
@@ -921,8 +915,8 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
                     <span>
                       {isExpired
                         ? `Application Suspended due to Validity Expiration (${formatDisplayDateTime(
-                            validityDateStr
-                          )}).`
+                          validityDateStr
+                        )}).`
                         : "Application is currently in Suspended status."}
                     </span>
                   </div>
