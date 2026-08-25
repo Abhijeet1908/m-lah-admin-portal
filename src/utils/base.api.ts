@@ -103,14 +103,60 @@ export async function apiCreateUser(payload: CreateUserDTO): Promise<any> {
   return response.data;
 }
 
-/** GET /Labour/GetLabourByStatus/{statusId} — fetch labour by status (1, 2, 3) */
+/** GET /Labour/GetLabourByStatus/{statusId} — fetch labour by status (1..5 or 'all') */
 export async function apiGetLabourByStatus(
   statusId: string | number
 ): Promise<LabourType[]> {
+  if (statusId === "all" || statusId === 0) {
+    return apiGetAllLabour();
+  }
+
   const response = await apiClient.get<LabourType[]>(
     `/Labour/GetLabourByStatus/${statusId}`
   );
-  return response.data || [];
+  const list = response.data || [];
+  const numericStatus = Number(statusId);
+  return list.map((item) => ({
+    ...item,
+    statusId: item.statusId ?? numericStatus,
+  }));
+}
+
+/** Fetch all labour across statuses 1, 2, 3, 4, 5 */
+export async function apiGetAllLabour(): Promise<LabourType[]> {
+  try {
+    const results = await Promise.allSettled([
+      apiClient.get<LabourType[]>("/Labour/GetLabourByStatus/1"),
+      apiClient.get<LabourType[]>("/Labour/GetLabourByStatus/2"),
+      apiClient.get<LabourType[]>("/Labour/GetLabourByStatus/3"),
+      apiClient.get<LabourType[]>("/Labour/GetLabourByStatus/4"),
+      apiClient.get<LabourType[]>("/Labour/GetLabourByStatus/5"),
+    ]);
+
+    const combined: LabourType[] = [];
+    const seenIds = new Set<string | number>();
+
+    results.forEach((res, index) => {
+      const statusNumber = index + 1; // 1: Submitted, 2: Reviewed, 3: Approved, 4: ReviewedPending, 5: Suspended
+      if (res.status === "fulfilled" && Array.isArray(res.value?.data)) {
+        res.value.data.forEach((item) => {
+          const id = item.labourId ?? item.id;
+          if (id != null && !seenIds.has(id)) {
+            seenIds.add(id);
+            combined.push({
+              ...item,
+              statusId: item.statusId ?? statusNumber,
+            });
+          }
+        });
+      }
+    });
+
+    return combined;
+  } catch (err) {
+    console.error("Error aggregating labour records:", err);
+    return [];
+  }
 }
 
 /** POST /Labour/updateLabourStatus — triage, approve, or reject labour application */

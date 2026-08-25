@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useGetLabourByStatus } from "../utils/base.hooks";
 import LabourCardBrief from "../components/customCards/LabourCardBrief";
-import { FiAlertCircle, FiInbox, FiSearch, FiRefreshCw } from "react-icons/fi";
+import { FiAlertCircle, FiClock, FiSearch, FiRefreshCw } from "react-icons/fi";
 
-const ApprovedLabourCard = () => {
-  const { labourCards, loading, error, refetch } = useGetLabourByStatus(3);
+const ReviewPendingLabourCard = () => {
+  const { labourCards, loading, error, refetch } = useGetLabourByStatus(4);
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredCards = labourCards.filter((labour) => {
@@ -46,7 +46,7 @@ const ApprovedLabourCard = () => {
           <FiAlertCircle size={24} />
         </div>
         <h3 className="font-serif font-bold text-ink-900 text-lg">
-          Unable to Load Approved Labour Records
+          Unable to Load Review Pending Records
         </h3>
         <p className="text-sm text-ink-600 max-w-md mx-auto">{error}</p>
         <button
@@ -69,7 +69,7 @@ const ApprovedLabourCard = () => {
           </div>
           <input
             type="text"
-            placeholder="Search approved certifications..."
+            placeholder="Search by name, ID, or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 rounded-xl border border-sand-300 bg-sand-50/50 text-xs text-ink-900 focus-visible:ring-2 focus-visible:ring-ocean-500"
@@ -77,8 +77,8 @@ const ApprovedLabourCard = () => {
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-center text-xs">
-          <span className="badge-tag bg-mint-50 text-mint-700 border border-mint-200">
-            {labourCards.length} Approved &amp; Certified
+          <span className="badge-tag bg-amber-50 text-amber-700 border border-amber-200">
+            {labourCards.length} Review Pending
           </span>
           <button
             onClick={() => refetch()}
@@ -92,14 +92,14 @@ const ApprovedLabourCard = () => {
 
       {filteredCards.length === 0 ? (
         <div className="bg-white rounded-2xl p-12 text-center border border-sand-200 shadow-card space-y-3">
-          <div className="inline-flex p-4 bg-sand-100 text-ink-400 rounded-full">
-            <FiInbox size={32} />
+          <div className="inline-flex p-4 bg-sand-100 text-amber-500 rounded-full">
+            <FiClock size={32} />
           </div>
           <h3 className="font-serif font-bold text-ink-900 text-lg">
-            No Approved Labour Certifications Yet
+            No Review Pending Applications
           </h3>
           <p className="text-sm text-ink-600 max-w-md mx-auto">
-            Officially sanctioned labor applicants will be permanently indexed in this register.
+            Applications placed under review or awaiting clarification will populate here. Only Reviewers can triage them to Submitted or Processed.
           </p>
         </div>
       ) : (
@@ -115,4 +115,4 @@ const ApprovedLabourCard = () => {
   );
 };
 
-export default ApprovedLabourCard;
+export default ReviewPendingLabourCard;

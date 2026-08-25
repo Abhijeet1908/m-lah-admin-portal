@@ -40,6 +40,14 @@ export interface UpdateLabourStatusDTO {
   remark?: string | null;
 }
 
+export enum LabourStatusEnum {
+  Submitted = 1,
+  Reviewed = 2, // Alias: Processed
+  Approved = 3,
+  ReviewedPending = 4, // Review Pending
+  Suspended = 5,
+}
+
 export interface LabourType {
   id?: string | number;
   labourId?: number;
@@ -54,9 +62,19 @@ export interface LabourType {
   photo?: string | null;
   documentFront?: string | null;
   documentBack?: string | null;
-  createdAt?: string | null;
-  statusId?: number | null;
+  isVerified?: boolean | null;
+  verifiedBy?: string | null;
+  verifiedOn?: string | null;
   remark?: string | null;
+  createdAt?: string | null;
+  validUpTo?: string | null;
+  validUpto?: string | null;
+  validityDate?: string | null;
+  isApproved?: boolean | null;
+  approvedBy?: string | null;
+  approvedOn?: string | null;
+  status?: string | null;
+  statusId?: number | null;
 }
 
 export interface TouristType {
