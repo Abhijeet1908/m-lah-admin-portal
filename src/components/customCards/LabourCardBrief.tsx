@@ -24,6 +24,10 @@ import {
   FiArrowRight,
   FiCheckSquare,
   FiAward,
+  FiTool,
+  FiCreditCard,
+  FiBriefcase,
+  FiUserCheck,
 } from "react-icons/fi";
 
 interface LabourCardBriefProps {
@@ -260,9 +264,24 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
               <h2 className="text-xl font-bold text-ink-900 font-serif">
                 {fullName || "Labour Applicant"}
               </h2>
-              {isValidFieldValue(labour.labourId || labour.id) && (
+
+              {/* Labour Card Number Badge if present */}
+              {isValidFieldValue(labour.labourCardNumber) ? (
+                <span className="badge-tag bg-ocean-50 text-ocean-800 border border-ocean-200/80 font-mono font-bold flex items-center gap-1">
+                  <FiCreditCard size={12} className="text-ocean-600" />
+                  Card #{labour.labourCardNumber}
+                </span>
+              ) : isValidFieldValue(labour.labourId || labour.id) ? (
                 <span className="badge-tag bg-ocean-50 text-ocean-700 border border-ocean-200/80">
                   Record #{labour.labourId || labour.id}
+                </span>
+              ) : null}
+
+              {/* Skill / Trade Category Badge */}
+              {isValidFieldValue(labour.labourTypeName) && (
+                <span className="badge-tag bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1 font-semibold">
+                  <FiTool size={11} className="text-emerald-600" />
+                  {labour.labourTypeName}
                 </span>
               )}
 
@@ -298,6 +317,12 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
             </div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-600">
+              {isValidFieldValue(labour.labourTypeName) && (
+                <span className="flex items-center text-emerald-800 font-semibold">
+                  <FiTool className="mr-1.5 text-emerald-600 flex-shrink-0" size={13} />
+                  {labour.labourTypeName}
+                </span>
+              )}
               {isValidFieldValue(labour.permanentAddress) && (
                 <span className="flex items-center">
                   <FiMapPin className="mr-1.5 text-ocean-600 flex-shrink-0" size={13} />
@@ -308,6 +333,15 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
                 <span className="flex items-center">
                   <FiPhone className="mr-1.5 text-ocean-600 flex-shrink-0" size={13} />
                   {labour.contactNumber}
+                </span>
+              )}
+              {isValidFieldValue(labour.contactPerson) && (
+                <span className="flex items-center text-ink-700">
+                  <FiUserCheck className="mr-1.5 text-ocean-600 flex-shrink-0" size={13} />
+                  Contractor: {labour.contactPerson}
+                  {isValidFieldValue(labour.contactPersonMobile)
+                    ? ` (${labour.contactPersonMobile})`
+                    : ""}
                 </span>
               )}
               {isValidFieldValue(labour.createdAt) && (
@@ -439,7 +473,81 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
             </div>
           </div>
 
-          {/* SECTION 2: Official Audit, Verification & Approval Trail */}
+          {/* SECTION 2: Skill Classification & Contractor / Employer Information */}
+          {(isValidFieldValue(labour.labourTypeName) ||
+            isValidFieldValue(labour.labourTypeID) ||
+            isValidFieldValue(labour.labourTypeDescription) ||
+            isValidFieldValue(labour.contactPerson) ||
+            isValidFieldValue(labour.contactPersonMobile)) && (
+            <div className="bg-sand-50 rounded-2xl p-5 border border-sand-200/80 space-y-4">
+              <h3 className="text-xs font-bold text-ink-900 uppercase tracking-wider font-sans flex items-center">
+                <FiBriefcase className="mr-2 text-ocean-600" size={15} />
+                Skill Classification &amp; Contractor / Employer Information
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                {isValidFieldValue(labour.labourTypeName) && (
+                  <div>
+                    <span className="text-ink-400 uppercase font-semibold text-[10px] block">
+                      Skill / Labour Type
+                    </span>
+                    <p className="font-semibold text-emerald-800 mt-0.5 flex items-center">
+                      <FiTool className="mr-1 text-emerald-600" size={12} />
+                      {labour.labourTypeName}
+                    </p>
+                  </div>
+                )}
+
+                {isValidFieldValue(labour.labourTypeID) && (
+                  <div>
+                    <span className="text-ink-400 uppercase font-semibold text-[10px] block">
+                      Skill Type ID / Code
+                    </span>
+                    <p className="font-semibold text-ink-800 mt-0.5">
+                      #{labour.labourTypeID}
+                    </p>
+                  </div>
+                )}
+
+                {isValidFieldValue(labour.contactPerson) && (
+                  <div>
+                    <span className="text-ink-400 uppercase font-semibold text-[10px] block">
+                      Contractor / Contact Person
+                    </span>
+                    <p className="font-semibold text-ink-800 mt-0.5 flex items-center">
+                      <FiUserCheck className="mr-1 text-ocean-600" size={12} />
+                      {labour.contactPerson}
+                    </p>
+                  </div>
+                )}
+
+                {isValidFieldValue(labour.contactPersonMobile) && (
+                  <div>
+                    <span className="text-ink-400 uppercase font-semibold text-[10px] block">
+                      Contractor Contact Mobile
+                    </span>
+                    <p className="font-semibold text-ink-800 mt-0.5 flex items-center">
+                      <FiPhone className="mr-1 text-ink-400" size={12} />
+                      {labour.contactPersonMobile}
+                    </p>
+                  </div>
+                )}
+
+                {isValidFieldValue(labour.labourTypeDescription) && (
+                  <div className="sm:col-span-2 md:col-span-4">
+                    <span className="text-ink-400 uppercase font-semibold text-[10px] block">
+                      Skill Scope &amp; Job Description
+                    </span>
+                    <p className="font-medium text-ink-700 mt-1 p-2.5 bg-white rounded-lg border border-sand-200 leading-relaxed">
+                      {labour.labourTypeDescription}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 3: Official Audit, Verification & Approval Trail */}
           <div className="bg-sand-50 rounded-2xl p-5 border border-sand-200/80 space-y-4">
             <h3 className="text-xs font-bold text-ink-900 uppercase tracking-wider font-sans flex items-center">
               <FiCheckSquare className="mr-2 text-mint-600" size={15} />
@@ -447,6 +555,18 @@ const LabourCardBrief: React.FC<LabourCardBriefProps> = ({
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+              {/* Labour Card Number */}
+              {isValidFieldValue(labour.labourCardNumber) && (
+                <div>
+                  <span className="text-ink-400 uppercase font-semibold text-[10px] block">
+                    Labour Card Number
+                  </span>
+                  <p className="font-mono font-bold text-ocean-900 mt-0.5 flex items-center">
+                    <FiCreditCard className="mr-1 text-ocean-600" size={13} />
+                    {labour.labourCardNumber}
+                  </p>
+                </div>
+              )}
               {/* Verification Status */}
               {labour.isVerified !== undefined && labour.isVerified !== null && (
                 <div>

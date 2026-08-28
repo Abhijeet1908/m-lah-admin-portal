@@ -51,6 +51,7 @@ export enum LabourStatusEnum {
 export interface LabourType {
   id?: string | number;
   labourId?: number;
+  labourCardNumber?: string | null;
   firstName: string;
   middleName?: string | null;
   lastName: string;
@@ -75,6 +76,11 @@ export interface LabourType {
   approvedOn?: string | null;
   status?: string | null;
   statusId?: number | null;
+  labourTypeID?: number | null;
+  labourTypeName?: string | null;
+  labourTypeDescription?: string | null;
+  contactPerson?: string | null;
+  contactPersonMobile?: string | null;
 }
 
 export interface TouristType {

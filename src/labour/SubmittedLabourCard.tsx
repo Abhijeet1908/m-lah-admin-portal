@@ -13,10 +13,20 @@ const SubmittedLabourCard = () => {
       .join(" ")
       .toLowerCase();
     const contact = (labour.contactNumber || "").toLowerCase();
-    const id = String(labour.labourId || labour.id || "");
+    const id = String(labour.labourId || labour.id || "").toLowerCase();
+    const cardNo = (labour.labourCardNumber || "").toLowerCase();
+    const skill = (labour.labourTypeName || "").toLowerCase();
+    const contactPerson = (labour.contactPerson || "").toLowerCase();
     const term = searchTerm.toLowerCase();
 
-    return fullName.includes(term) || contact.includes(term) || id.includes(term);
+    return (
+      fullName.includes(term) ||
+      contact.includes(term) ||
+      id.includes(term) ||
+      cardNo.includes(term) ||
+      skill.includes(term) ||
+      contactPerson.includes(term)
+    );
   });
 
   if (loading) {
